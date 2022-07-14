@@ -20,11 +20,36 @@ namespace GoatUniversity.Controllers
         }
 
         // GET: Students
-        public async Task<IActionResult> Index()
+        public IActionResult Index(string sortOrder, string currentFilter, string searchString, int? pageNumber)
         {
-              return _context.Students != null ? 
-                          View(await _context.Students.ToListAsync()) :
-                          Problem("Entity set 'SchoolContext.Students'  is null.");
+            ViewData["CurrentSort"] = sortOrder;
+            ViewData["NameSortParam"] = String.IsNullOrEmpty(sortOrder) || sortOrder == "name" ? "name_desc" : "name";
+            ViewData["DateSortParam"] = sortOrder == "date" ? "date_desc" : "date";
+
+            if (searchString != null)
+                pageNumber = 1;
+            else
+                searchString = currentFilter;
+
+            ViewData["CurrentFilter"] = searchString;
+
+            var students = from s in _context.Students select s;
+
+            if (!String.IsNullOrEmpty(searchString))
+            {
+                students = students.Where(s => s.LastName.Contains(searchString) || s.FirstName.Contains(searchString));
+            }
+
+            students = sortOrder switch
+            {
+                "name_desc" => students.OrderByDescending(s => s.LastName),
+                "date" => students.OrderBy(s => s.EnrollmentDate),
+                "date_desc" => students.OrderByDescending(s => s.EnrollmentDate),
+                _ => students.OrderBy(s => s.LastName),
+            };
+
+            int pageSize = 3;
+            return View(PaginatedList<Student>.Create(students.AsNoTracking(), pageNumber ?? 1, pageSize));
         }
 
         // GET: Students/Details/5
@@ -36,7 +61,7 @@ namespace GoatUniversity.Controllers
             }
 
             var student = await _context.Students
-                .Include(s => s.Enrollments)
+                .Include(s => s.Enrollments!)
                 .ThenInclude(e => e.Course)
                 .AsNoTracking()
                 .FirstOrDefaultAsync(m => m.ID == id);
@@ -171,7 +196,7 @@ namespace GoatUniversity.Controllers
             catch (DbUpdateException /* ex */)
             {
                 // Log the error (uncomment ex variable name and write a log).
-                return RedirectToAction(nameof(Delete), new { id = id, saveChangesError = true });
+                return RedirectToAction(nameof(Delete), new { id, saveChangesError = true });
             }
         }
 
