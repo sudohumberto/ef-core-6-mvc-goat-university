@@ -1,0 +1,11 @@
+{
+  "Version": 1,
+  "ProjectMap": {
+    "50a5e682-6c5f-4b4d-9da7-d0ca5c5d8495": {
+      "ProjectGuid": "50a5e682-6c5f-4b4d-9da7-d0ca5c5d8495",
+      "DisplayName": "GoatUniversity",
+      "ColorIndex": 0
+    }
+  },
+  "NextColorIndex": 1
+}
