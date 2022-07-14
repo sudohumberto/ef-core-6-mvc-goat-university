@@ -7,6 +7,6 @@
         public string FirstName { get; set; } = null!;
         public DateTime EnrollmentDate { get; set; }
 
-        public ICollection<Enrollment> Enrollments { get; set; }
+        public ICollection<Enrollment>? Enrollments { get; set; }
     }
 }
